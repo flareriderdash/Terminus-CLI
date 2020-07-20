@@ -361,7 +361,7 @@
 
 
 	     if (cmdline[index] in ("-d", "--description")
-	     and kwargs['desc'] == None and (index +1) > len(cmdline) -1):
+	     and kwargs['desc'] == None and (index +1) < len(cmdline)):
 		 kwargs['desc'] = cmdline[index+1]
 
 	     else:
@@ -370,7 +370,7 @@
 
 
 	     if (cmdline[index] in ("-p" ,"--password")
-	     and kwargs['pass'] == None and (index + 1) > len(cmdline) -1 ):
+	     and kwargs['pass'] == None and (index + 1) < len(cmdline)):
 		 kwargs['pass'] = cmdline[index+1]
 	     else:
 		 arg_parse_err(ARG_LIMIT,"password",usage)
@@ -378,7 +378,7 @@
 
 
 	     if (cmdline[index] in ("-l","--label")
-	     and kwargs['label'] == None and (index + 1) > len(cmdline) -1 ):
+	     and kwargs['label'] == None and (index + 1) < len(cmdline)):
 		 kwargs['label'] = cmdline[index+1]
 	     else:
 		 arg_parse_err(ARG_LIMIT,"label",usage)
