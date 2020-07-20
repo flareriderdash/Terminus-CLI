@@ -15,6 +15,10 @@
   https://terminusdb.github.io/terminusdb-client-python/modules.html
   by the terminusDB developers.
 
+  #+NAME:main_imports
+  #+BEGIN_SRC python 
+  import terminusdb_client
+  #+END_SRC
 * Plan
 ** [2020-07-02 Thu 13:33]
    The best course of action most likely is to do the argument
@@ -99,11 +103,15 @@
   This is where nearly all program flow is determined. There must be a
   translation interface in place to convert comanndline arguments into
   usable structures within python. 
+** TODO 
+   - Generalize argument parsing for the sake of ease of use in the
+     future.
 ** General Usage Message
    #+NAME:general_usage
    #+BEGIN_SRC python 
    def print_gen_usage():
-	   usage = """
+	   usage = \
+   """
    PLACEHOLDER
    """
 	   print(usage)
@@ -266,7 +274,7 @@
 		format_str = get_errstr_from_errint(error)
 		print(format_str.format(str_var))
 		print(usage)
-		exit(eval(error))
+		exit(error)
 	#fed        
 	#+END_SRC
 
@@ -293,7 +301,11 @@
 	#fed
         #+END_SRC
 	
-***** Action definition
+***** READ-NOTE Action definition
+      :LOGBOOK:
+      - Note taken on [2020-07-20 Mon 15:16] \\
+	May want to define a way to verify url integrity
+      :END:
       This is the function where the add-database fuctionality is
       initiated. It simply expects the entire command line argument
       list (sys.argv) passed to it. It calls other helper functions to
@@ -344,7 +356,7 @@
 	 } 
 
 
-
+	 # Parse Arguments
 	 for index in range(len(cmdline)):
 
 
@@ -380,9 +392,37 @@
 	     #fi
 	 #rof
 
+
+
+	 # Query Database and Add 
+	 client=terminusdb_client.WOQLClient(kwargs['url'])
+	 client.connect(
+		 accountid=kwargs['pass'],
+		 key=kwargs['user'],
+		 user=kwargs['user'])
+
+	 client.create_database(
+		 kwargs['dbid'],
+		 kwargs['pass'],
+		 kwargs['label'],
+		 kwargs['desc'],
+		 None,
+		 kwargs['schema'])
+
+
 	 return 0
      #fed
      #+END_SRC
+
+****** TODO 
+       - [ ] Figure out how authentication works with these oddly
+         named/redundant variables
+         
+       - [ ] Add prefix capabilities
+
+       - [ ] Check for missing arguments
+
+       - [ ] Enforce no spaces within dbid
 
 ***** Main hook
       This is simply the snippet of code makes the main function
@@ -446,9 +486,13 @@
 
 * Files
 ** Terminus-cli.py
+   :PROPERTIES:
+   :ID:       37643e89-278b-480c-8205-2bb52ee03f17
+   :END:
    #+NAME:Main-file
    #+BEGIN_SRC python :tangle terminus-cli.py :noweb yes
    #!/usr/env/python3
+   <<main_imports>>
    <<Parser_imports>>
    <<constants>>
    <<add-database_action>>
