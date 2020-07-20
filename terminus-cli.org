@@ -1,0 +1,467 @@
+#+TITLE: Python CLI tool for TerminusDB
+#+AUTHOR: Gabriel X. S. Smith
+#+LATEX_HEADER:\usepackage{minted}
+* Abstract 
+  This is a non-interactive python cli tool that helps with the
+  interface with terminalDB, It is currently being developed with
+  testing being done on the Terminus docker image. This project also
+  will attempt to impliment functional programming programming styles
+
+* TODO Glossary
+  View the official terminusdb website for terms and definitions
+* Backend
+  The main library that that is used is the TerminusDB python client
+  provided at
+  https://terminusdb.github.io/terminusdb-client-python/modules.html
+  by the terminusDB developers.
+
+* Plan
+** [2020-07-02 Thu 13:33]
+   The best course of action most likely is to do the argument
+   handling later since I don't know how difficult that will be. I
+   will define an interface so that I can develop other parts of the
+   system first.
+** [2020-07-02 Thu 18:42]
+   To think of this project in chains is the best idea. Individually
+   developing each action's command line data structure and then
+   calling the associated function(s) to allow for easy extendability.
+   
+   In this project each action that the user wishes to take with the
+   database is seen as a chain of instructions (individual functions
+   written specifically for that action) which have little-to-no
+   dependancy on code written within another chain. There are no
+   handler classes/objects. If code is written that is to apply for
+   more than one chain, it is to be applicable to all chains as well
+   and therefore must be generalized and well defined in behavior.
+
+*** Specifcs of this project
+    As for the specifics of this project. The abstract chains start at
+    user command-line input and end at the database library. It is
+    quite the simple, a translation layer that make more friendly
+    commands from the user to the terminusDB database at the command
+    line interface. Due to the translation nature of this software
+    there is heavy focus on argument parsing and the attempts to make
+    it as compact and simple as possible while still allowing for large
+    variety in the possible commands issued.  This is why the first
+    part in the chain is modal parsing methods.
+
+    The modal/action parsing methods are given the list of arguments
+    that the sys module provides after determining which action/mode
+    the user wishes to execute. These methods will construct from the
+    command line arguments data structures of optional and positional
+    arguments to then send to functions that will call into the
+    TerminusDB client library.
+
+    Due to the nature of some of the library calls it is benefital to
+    us to individually impliment each feature separate from each other
+    since certain actions may have to parse arguments differently
+    compared to other actions. This also allows for us to easily
+    impliment new features and align with the functional programming
+    paradigm with the least risk of breaking a foundational part. I
+    also just really don't feel like it is possible to generalize these
+    parsing functions without obscene complexity and I don't want to do
+    it. Maybe at a later date I will make general these parsing
+    functions.
+** [2020-07-06 Mon 14:39]
+   We will impliment each action and sub action (in it's entirety) in
+   a function for the sake of easy maintaininence. I may make a
+   dedicated parsing function in the future but at the moment is not
+   needed.
+** [2020-07-07 Tue 23:26]
+   - Have to strighten out how I am going to describe modal parsing
+     within text.
+* Research
+  An example of how to use the TerminusDB use is found [[https://terminusdb.com/docs/getting-started/start-tutorials/console_js/#create-a-schema][here]]
+** Schemas
+   - TerminusDB allows for schemaless databases but heavily encourages
+     use of schemas.
+     - OWL is used for defining schemas
+     - There are javascript and python libraries for schema
+       development
+   - Schemas define the "Classes" of data which follow closely to how
+     classes are described in OOP.
+     - Properties are a little confusing.
+   - Detailed info on schemas can be found [[https://terminusdb.com/docs/user-guide/schema][here]] and in section
+     "Classes ​& Properties" [[https://terminusdb.com/docs/getting-started/intro-graph/][here]]
+** Data Mutation
+   Data mutation and definition is done completely via WOQL queries.
+** Library Models
+   The database client is an object which has many methods.
+
+* Constants
+  Constants defined here will be used for: error codes
+  #+NAME:constants
+  #+BEGIN_SRC python
+  ARG_LIMIT=-1
+  REQUIRED_ARG=-2
+  #+END_SRC
+* Command-Line Parser
+  This is where nearly all program flow is determined. There must be a
+  translation interface in place to convert comanndline arguments into
+  usable structures within python. 
+** General Usage Message
+   #+NAME:general_usage
+   #+BEGIN_SRC python 
+   def print_gen_usage():
+	   usage = """
+   PLACEHOLDER
+   """
+	   print(usage)
+	   #fed
+   #+END_SRC
+** Actions/Modes
+   Actions/Modes allow for a more condensed command line interface and
+   they will therefore be used. However, in this program there are two
+   positional arguemnts that are required to prefix any mode
+   arguments: the database url and action.
+
+*** VERIFY add-database
+    This action adds a database to TerminusDB instance found at url.
+**** Positional Arguements
+     1. Database id
+**** Optional Arguments
+     - A description
+     - Any Prefixes
+     - A key
+
+*** RESEARCHING add-node
+    :LOGBOOK:
+    - Note taken on [2020-07-01 Wed 23:23] \\
+      Seems to need a WOQL to import data
+    - Note taken on [2020-07-01 Wed 21:57] \\
+      Need to research how the database stores data after a database is created 
+    :END:
+**** Positional Arguements
+     
+**** Optional Arguments
+*** VERIFY rm-database
+**** Positional Arguements
+     1. database-ID
+**** Optional Arguments
+
+     - Password
+*** VERIFY query
+**** Positional Arguements
+     1. WOQL Query
+**** Optional Arguments
+     - Commit message
+     - File list
+*** vcs	      
+**** VERIFY Checkout
+***** Positional Arguements
+      1. branchid
+***** Optional Arguements
+**** VERIFY branch
+***** Positional Arguments
+      1. branchid
+***** Optional Arguments
+**** VERIFY pull
+***** Positional Arguments
+      1. remote-repo
+***** Optional Arguments
+**** VERIFY fetch
+***** Positional Arguments
+      1. remote-repo 
+***** Optional Arguments
+**** VERIFY push
+***** Positional Arguments
+      1. remote-repo
+***** Optional Arguments
+**** VERIFY rebase
+***** Positional Arguments
+      1. rebase-source
+***** Optional Arguments
+**** VERIFY clone
+***** Positional Arguments
+      1. remote-source
+      2. newid
+***** Optional Arguments
+**** VERIFY repo
+***** Positional Arguments
+***** Optional Arguments
+      - repoid
+
+** Interface
+   :LOGBOOK:
+   - Note taken on [2020-07-07 Tue 23:58] \\
+     May want to use POSIX syntax for arguments
+   :END:
+   This interface is the interface that is used to translate the
+   command line arguements into something usable. It will be seperated
+   into multiple modes determined by actions. Much like the program
+   Heimdall or git. This Specifc usable thing will be template dictionaries
+   
+   
+   
+*** Interface imports ​& initialization
+    :LOGBOOK:
+    - Note taken on [2020-07-07 Tue 23:21] \\
+      Have to remember to update this if there is ever a change to how
+      parsing is done within every chain
+    :END:
+    We will use:
+    - Our own implimented modal argument parser (having a parser
+      function for each mode).
+    - The copy library from python and it's shallow copy functionality
+      to conform to functional programming.
+
+    #+NAME:Parser_imports
+    #+BEGIN_SRC python :noweb
+    import sys
+    import copy
+    #+END_SRC
+
+***  add-database
+    This action adds a database to TerminusDB instance found at url.
+**** Positional Arguements
+     1. Database id
+
+**** Optional Arguments
+     - A description
+     - Any Prefixes
+     - A key
+**** TODO add-database parsing and execute
+     :LOGBOOK:
+     - Note taken on [2020-07-02 Thu 16:37] \\
+       We will need to impliment a check for a boolean argument that does not
+       take a value argument, we have to drop the even assumption
+     - Note taken on [2020-07-02 Thu 16:33] \\
+       This action may have to take multiple '--prefix' arguments from the command line
+     :END:
+     This will impliment the parsing for the add-database action and
+     call the necessary functions to prepare and execute the query.
+***** Helper functions
+      These functions are generalized for use with The main
+      add-database action code
+****** Error Handling
+       :LOGBOOK:
+       - Note taken on [2020-07-07 Tue 23:34] \\
+	 Be aware that you may need to impliment error string with undefined
+	 amounts of replacments
+       :END:
+       It is important to note that [[*get_errstr_from_errint][get_errstr_from_errint]] and
+       [[add-database_arg_parse_err][add-database_arg_parse_err]] require that predefined error format
+       strings have only a single replacment defined within them. This
+       may change in the future.
+******* arg_parse_err
+	This function is for throwing errors and terminating when an
+	error in parsing occurs. It takes an integer value which is
+	the error code and a string variable containing the name of
+	the argument causing the error which will be placed into a
+	format string and then printed before the usage parameter. It
+	uses the helper function [[*get_errstr_from_errint][get_errstr_from_errint]] to assist in
+	getting a predefined error format string from an integer
+	value.
+
+	The final parameter is any string that the caller would like
+	to have printed to stdout before the program terminates,
+	typically this would be a usage string for the mode/action
+	where the error was encountered.
+
+	Finally at termination, the program will terminate with the
+	error code that this function was called with.
+	#+NAME:add-database_arg_parse_err
+	#+BEGIN_SRC python
+	def arg_parse_err(error,str_var,usage):
+		format_str = get_errstr_from_errint(error)
+		print(format_str.format(str_var))
+		print(usage)
+		exit(eval(error))
+	#fed        
+	#+END_SRC
+
+******* get_errstr_from_errint
+	:LOGBOOK:
+	- Note taken on [2020-07-07 Tue 23:21] \\
+	  Preferably we would be able to have this function be agnostic towards
+	  the arguments instead of having int-to-string conversions be hard
+	  coded.
+	:END:
+	This function is a helper function to [[*arg_parse_err][arg_parse_err]] and serves
+	to map an error integer parameter to a format string. This is
+	where one would define error strings for predefined error
+	constants.
+	#+NAME:add-database_get_errstr_from_errint
+	#+BEGIN_SRC python
+	def get_errstr_from_errint(errorint):
+
+	    if errorint == ARG_LIMIT:
+		return "You cannot have more than one {}"
+	    elif errorint == REQUIRED_ARG:
+		return "{} requires an argument"
+	    #fi
+	#fed
+        #+END_SRC
+	
+***** Action definition
+      This is the function where the add-database fuctionality is
+      initiated. It simply expects the entire command line argument
+      list (sys.argv) passed to it. It calls other helper functions to
+      perform its operations, ref [[*Helper functions][Helper functions]]
+     #+NAME:add-database_action
+     #+BEGIN_SRC python :noweb yes
+     <<add-database_get_errstr_from_errint>>
+     <<add-database_arg_parse_err>>
+     def add_database_action(cmdline):
+	 # Expectations:
+	     # cmdline, sys.argv list
+
+	 usage = \
+     """
+     Action: add-database user database_id [options]
+
+     --help, -h              display this help 
+			     message
+
+     -d, --description       description to add
+			     to created database
+
+     -p, --password          password to login with
+
+     -l, --label             label for the database
+
+     -n,--no-schema          make database without
+			     schema
+     """
+
+	 # If asking for help, politly exit
+
+	 if (("--help" in cmdline or "-h" in cmdline)
+	 or len(cmdline) < 5):
+	     print(usage)
+	     exit(0)
+	 #fi
+
+	 kwargs = {
+	     "url":sys.argv[1],
+	     "action":sys.argv[2],
+	     "user":sys.argv[3],
+	     "dbid":sys.argv[4],
+	     "desc":None,
+	     "pass":None,
+	     "label":None,
+	     "schema":True
+	 } 
+
+
+
+	 for index in range(len(cmdline)):
+
+
+	     if (cmdline[index] in ("-d", "--description")
+	     and kwargs['desc'] == None and (index +1) > len(cmdline) -1):
+		 kwargs['desc'] = cmdline[index+1]
+
+	     else:
+		 arg_parse_err(ARG_LIMIT,"description",usage)
+	     #fi
+
+
+	     if (cmdline[index] in ("-p" ,"--password")
+	     and kwargs['pass'] == None and (index + 1) > len(cmdline) -1 ):
+		 kwargs['pass'] = cmdline[index+1]
+	     else:
+		 arg_parse_err(ARG_LIMIT,"password",usage)
+	     #fi
+
+
+	     if (cmdline[index] in ("-l","--label")
+	     and kwargs['label'] == None and (index + 1) > len(cmdline) -1 ):
+		 kwargs['label'] = cmdline[index+1]
+	     else:
+		 arg_parse_err(ARG_LIMIT,"label",usage)
+	     #fi
+
+	     if (cmdline[index] in ("-n","--no-schema")
+	     and kwargs['schema'] == True):
+		 schema == False
+	     else:
+		 arg_parse_err(ARG_LIMIT,"schema",usage)
+	     #fi
+	 #rof
+
+	 return 0
+     #fed
+     #+END_SRC
+
+***** Main hook
+      This is simply the snippet of code makes the main function
+      execute the add-database action when called for at the command
+      line.
+      #+NAME:add-database_hook
+      #+BEGIN_SRC python 
+      if sys.argv[2] == "add-database":
+	  add_database_action(sys.argv)
+      #+END_SRC
+***  add-node
+**** Positional Arguements
+     
+**** Optional Arguments
+***  rm-database
+**** Positional Arguements
+     1. database-ID
+**** Optional Arguments
+
+     - Password
+***  query
+**** Positional Arguements
+     1. WOQL Query
+**** Optional Arguments
+     - Commit message
+     - File list
+***  vcs	      
+****  Checkout
+***** Positional Arguements
+      1. branchid
+***** Optional Arguements
+****  branch
+***** Positional Arguments
+      1. branchid
+***** Optional Arguments
+****  pull
+***** Positional Arguments
+      1. remote-repo
+***** Optional Arguments
+****  fetch
+***** Positional Arguments
+      1. remote-repo 
+***** Optional Arguments
+****  push
+***** Positional Arguments
+      1. remote-repo
+***** Optional Arguments
+****  rebase
+***** Positional Arguments
+      1. rebase-source
+***** Optional Arguments
+****  clone
+***** Positional Arguments
+      1. remote-source
+      2. newid
+***** Optional Arguments
+****  repo
+***** Positional Arguments
+***** Optional Arguments
+      - repoid
+
+* Files
+** Terminus-cli.py
+   #+NAME:Main-file
+   #+BEGIN_SRC python :tangle terminus-cli.py :noweb yes
+   #!/usr/env/python3
+   <<Parser_imports>>
+   <<constants>>
+   <<add-database_action>>
+   <<general_usage>>
+   def main():
+       if len(sys.argv) < 3:
+	   print_gen_usage()
+	   exit(REQUIRED_ARG)
+       <<add-database_hook>>
+       return 0
+   #fed
+
+   if __name__ == "__main__":
+       main()
+   #fi
+   #+END_SRC
