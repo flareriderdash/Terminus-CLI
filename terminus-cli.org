@@ -220,6 +220,9 @@
     #+END_SRC
 
 ***  add-database
+    :PROPERTIES:
+    :ID:       e8a096ce-4c07-4a69-97ec-d2cbd35b965c
+    :END:
     This action adds a database to TerminusDB instance found at url.
 **** Positional Arguements
      1. Database id
@@ -229,6 +232,9 @@
      - Any Prefixes
      - A key
 **** TODO add-database parsing and execute
+     :PROPERTIES:
+     :ID:       0876da98-2434-4e2d-b415-b60d0f6ddf8d
+     :END:
      :LOGBOOK:
      - Note taken on [2020-07-02 Thu 16:37] \\
        We will need to impliment a check for a boolean argument that does not
@@ -267,7 +273,9 @@
 	where the error was encountered.
 
 	Finally at termination, the program will terminate with the
-	error code that this function was called with.
+	error code that this function was called with. This is a
+	stateful function due to IO and process operations.
+	
 	#+NAME:add-database_arg_parse_err
 	#+BEGIN_SRC python
 	def arg_parse_err(error,str_var,usage):
@@ -288,7 +296,7 @@
 	This function is a helper function to [[*arg_parse_err][arg_parse_err]] and serves
 	to map an error integer parameter to a format string. This is
 	where one would define error strings for predefined error
-	constants.
+	constants. This is a stateless function
 	#+NAME:add-database_get_errstr_from_errint
 	#+BEGIN_SRC python
 	def get_errstr_from_errint(errorint):
@@ -301,7 +309,43 @@
 	#fed
         #+END_SRC
 	
+******* add_database_terminus_execute 
+	This is a stateful function which executes the prepared
+	add_database action on the terminusDB instance. It takes the
+	dictionary given to by [[id:e8a096ce-4c07-4a69-97ec-d2cbd35b965c][add-database]] action and connect and
+	creates the new database to the TerminusDB instance
+	#+NAME:add-database_add_database_terminus_execute
+	#+BEGIN_SRC python
+	def add_database_terminus_execute(kwargs):
+
+		# Functional Programming stuffs
+		kwargs = copy.copy(kwargs)
+	
+		# Query Database and Add New Database
+		client=terminusdb_client.WOQLClient(kwargs['url'])
+		client.connect(
+			account=kwargs['accountid'],
+			key=kwargs['pass'],
+			user=kwargs['accountid'])
+
+		client.create_database(
+			kwargs['dbid'],
+			accountid = kwargs['accountid'],
+			label = kwargs['label'],
+			description = kwargs['desc'],
+			prefixes = None,
+			include_schema = kwargs['schema'])
+		return 0
+
+	#fed
+	#+END_SRC
+******** TODO 
+	 - [ ] Fix functionality
+
 ***** READ-NOTE Action definition
+      :PROPERTIES:
+      :ID:       1019d8af-8e34-4af9-aace-f5e5b9a914a3
+      :END:
       :LOGBOOK:
       - Note taken on [2020-07-20 Mon 15:16] \\
 	May want to define a way to verify url integrity
@@ -309,17 +353,19 @@
       This is the function where the add-database fuctionality is
       initiated. It simply expects the entire command line argument
       list (sys.argv) passed to it. It calls other helper functions to
-      perform its operations, ref [[*Helper functions][Helper functions]]
+      perform its operations, ref [[*Helper functions][Helper functions]]. This is a
+      stateless function
      #+NAME:add-database_action
      #+BEGIN_SRC python :noweb yes
      <<add-database_get_errstr_from_errint>>
      <<add-database_arg_parse_err>>
+     <<add-database_add_database_terminus_execute>>
      def add_database_action(cmdline):
-	 # Expectations:
+	     # Expectations:
 	     # cmdline, sys.argv list
 
 	 usage = \
-     """
+		 """
      Action: add-database user database_id [options]
 
      --help, -h              display this help 
@@ -339,76 +385,76 @@
 	 # If asking for help, politly exit
 
 	 if (("--help" in cmdline or "-h" in cmdline)
-	 or len(cmdline) < 5):
-	     print(usage)
-	     exit(0)
-	 #fi
+	     or len(cmdline) < 5):
+		 print(usage)
+		 exit(0)
+	     #fi
 
 	 kwargs = {
-	     "url":sys.argv[1],
-	     "action":sys.argv[2],
-	     "user":sys.argv[3],
-	     "dbid":sys.argv[4],
-	     "desc":None,
-	     "pass":None,
-	     "label":None,
-	     "schema":True
+		 "url":sys.argv[1],
+		 "action":sys.argv[2],
+		 'accountid':sys.argv[3],
+		 "dbid":sys.argv[4],
+		 "desc":None,
+		 "pass":None,
+		 "label":None,
+		 "schema":True
 	 } 
 
 
 	 # Parse Arguments
+
 	 for index in range(len(cmdline)):
 
-
+	     # Description Parse
 	     if (cmdline[index] in ("-d", "--description")
-	     and kwargs['desc'] == None and (index +1) < len(cmdline)):
-		 kwargs['desc'] = cmdline[index+1]
+		 and kwargs['desc'] == None and (index +1) < len(cmdline)):
+		     kwargs['desc'] = cmdline[index+1]
 
-	     else:
-		 arg_parse_err(ARG_LIMIT,"description",usage)
+	     elif (kwargs['desc'] != None) and (cmdline[index] in ("-d", "--description")):
+		     arg_parse_err(ARG_LIMIT,"description",usage)
+	     elif (index + 1) > len(cmdline):
+		     arg_parse_err(REQUIRED_ARG,"description",usage)
 	     #fi
 
-
+	     # Password Parse
 	     if (cmdline[index] in ("-p" ,"--password")
-	     and kwargs['pass'] == None and (index + 1) < len(cmdline)):
-		 kwargs['pass'] = cmdline[index+1]
-	     else:
-		 arg_parse_err(ARG_LIMIT,"password",usage)
+		 and kwargs['pass'] == None and (index + 1) < len(cmdline)):
+		     kwargs['pass'] = cmdline[index+1]
+
+	     elif (kwargs['pass'] != None) and (cmdline[index] in ("-p", "--password")):
+		     arg_parse_err(ARG_LIMIT,"password",usage)
+	     elif (index + 1) > len(cmdline):
+		     arg_parse_err(REQUIRED_ARG,"password",usage)
+
 	     #fi
 
-
+	     # Label Parse
 	     if (cmdline[index] in ("-l","--label")
-	     and kwargs['label'] == None and (index + 1) < len(cmdline)):
-		 kwargs['label'] = cmdline[index+1]
-	     else:
-		 arg_parse_err(ARG_LIMIT,"label",usage)
+		 and kwargs['label'] == None and (index + 1) < len(cmdline)):
+		     kwargs['label'] = cmdline[index+1]
+
+	     elif (kwargs['label'] != None) and (cmdline[index] in ("-l", "--label")):
+		     arg_parse_err(ARG_LIMIT,"label",usage)
+	     elif (index + 1) > len(cmdline):
+		     arg_parse_err(REQUIRED_ARG,"label",usage)
+
 	     #fi
 
+	     # Schema Parse
 	     if (cmdline[index] in ("-n","--no-schema")
-	     and kwargs['schema'] == True):
-		 schema == False
-	     else:
-		 arg_parse_err(ARG_LIMIT,"schema",usage)
+		 and kwargs['schema'] == True):
+		     schema == False
+	     elif (kwargs['schema'] != True) and (cmdline[index] in ("-n","--no-schema")):
+		     arg_parse_err(ARG_LIMIT,"schema flag",usage)
+	     elif (index + 1) > len(cmdline):
+		     arg_parse_err(REQUIRED_ARG,"schema",usage)
+
 	     #fi
 	 #rof
 
-
-
-	 # Query Database and Add 
-	 client=terminusdb_client.WOQLClient(kwargs['url'])
-	 client.connect(
-		 accountid=kwargs['pass'],
-		 key=kwargs['user'],
-		 user=kwargs['user'])
-
-	 client.create_database(
-		 kwargs['dbid'],
-		 kwargs['pass'],
-		 kwargs['label'],
-		 kwargs['desc'],
-		 None,
-		 kwargs['schema'])
-
+	 # Call stateful function for execution 
+	 add_database_terminus_execute(kwargs)
 
 	 return 0
      #fed
