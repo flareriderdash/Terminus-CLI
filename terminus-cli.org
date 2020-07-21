@@ -320,9 +320,9 @@
 
 		# Functional Programming stuffs
 		kwargs = copy.copy(kwargs)
-	
+
 		# Query Database and Add New Database
-		client=terminusdb_client.WOQLClient(kwargs['url'])
+		client=terminusdb_client.WOQLClient(server_url = kwargs['url'])
 		client.connect(
 			account=kwargs['accountid'],
 			key=kwargs['pass'],
@@ -340,7 +340,7 @@
 	#fed
 	#+END_SRC
 ******** TODO 
-	 - [ ] Fix functionality
+	 - [ ] Fix connectivity
 
 ***** READ-NOTE Action definition
       :PROPERTIES:
