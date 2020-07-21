@@ -424,6 +424,8 @@
 
        - [ ] Enforce no spaces within dbid
 
+       - [ ] Fix errors related to argument parsing of description
+
 ***** Main hook
       This is simply the snippet of code makes the main function
       execute the add-database action when called for at the command
