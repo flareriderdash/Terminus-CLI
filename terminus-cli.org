@@ -324,16 +324,18 @@
 		# Query Database and Add New Database
 		client=terminusdb_client.WOQLClient(server_url = kwargs['url'])
 		client.connect(
-			account=kwargs['accountid'],
-			key=kwargs['pass'],
-			user=kwargs['accountid'])
+			account = kwargs['accountid'],
+			key     = kwargs['pass'],
+			user    = kwargs['accountid'])
 
+		client.account(kwargs['accountid'])
+		print(kwargs)
 		client.create_database(
 			kwargs['dbid'],
-			accountid = kwargs['accountid'],
-			label = kwargs['label'],
-			description = kwargs['desc'],
-			prefixes = None,
+			kwargs['accountid'],
+			label          = kwargs['label'],
+			description    = kwargs['desc'],
+			prefixes       = None,
 			include_schema = kwargs['schema'])
 		return 0
 
