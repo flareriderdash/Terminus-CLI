@@ -74,8 +74,20 @@
 ** [2020-07-07 Tue 23:26]
    - Have to strighten out how I am going to describe modal parsing
      within text.
+** [2020-07-30 Thu 10:13]
+   - Heavily considering a migrate to full functional programming for
+     the sake of consistency and because of new knowledge of the
+     paradigm. Instead of omitting recursion. Need to figure out how
+     to do that in python however.
 * Research
-  An example of how to use the TerminusDB use is found [[https://terminusdb.com/docs/getting-started/start-tutorials/console_js/#create-a-schema][here]]
+  This section is simply a section that allows for free flowing
+  thought and notetaking when regarding something about inteeracting
+  with TerminusDB. None of this should be taken as fact, as this is
+  where thoughts mature and are nutrued into full fledge ideas and
+  knowledge.
+
+** General
+   An example of how to use the TerminusDB use is found [[https://terminusdb.com/docs/getting-started/start-tutorials/console_js/#create-a-schema][here]]
 ** Schemas
    - TerminusDB allows for schemaless databases but heavily encourages
      use of schemas.
@@ -102,11 +114,17 @@
 * Command-Line Parser
   This is where nearly all program flow is determined. There must be a
   translation interface in place to convert comanndline arguments into
-  usable structures within python. 
-** TODO 
+  usable structures within python. Code blocks concerning certain
+  sections under [[id:79700b07-71e5-4a72-8fb7-297604fbe3cc][Actions/Modes]] will be placed into the sister section
+  [[id:c7c42c51-3351-44c9-8c1d-9f4bbb11393c][Interface]], for the sake of reader convenience while also allowing
+  for some separation between ideas and actual code documentation. 
+** TODO
    - Generalize argument parsing for the sake of ease of use in the
      future.
 ** General Usage Message
+   This is the general usage message to print when no specific mode
+   was provided, telling the user about possible modes/actions that
+   they can perform.
    #+NAME:general_usage
    #+BEGIN_SRC python 
    def print_gen_usage():
@@ -118,6 +136,9 @@
 	   #fed
    #+END_SRC
 ** Actions/Modes
+   :PROPERTIES:
+   :ID:       79700b07-71e5-4a72-8fb7-297604fbe3cc
+   :END:
    Actions/Modes allow for a more condensed command line interface and
    they will therefore be used. However, in this program there are two
    positional arguemnts that are required to prefix any mode
@@ -190,6 +211,9 @@
       - repoid
 
 ** Interface
+   :PROPERTIES:
+   :ID:       c7c42c51-3351-44c9-8c1d-9f4bbb11393c
+   :END:
    :LOGBOOK:
    - Note taken on [2020-07-07 Tue 23:58] \\
      May want to use POSIX syntax for arguments
@@ -198,8 +222,6 @@
    command line arguements into something usable. It will be seperated
    into multiple modes determined by actions. Much like the program
    Heimdall or git. This Specifc usable thing will be template dictionaries
-   
-   
    
 *** Interface imports ​& initialization
     :LOGBOOK:
@@ -224,13 +246,6 @@
     :ID:       e8a096ce-4c07-4a69-97ec-d2cbd35b965c
     :END:
     This action adds a database to TerminusDB instance found at url.
-**** Positional Arguements
-     1. Database id
-
-**** Optional Arguments
-     - A description
-     - Any Prefixes
-     - A key
 **** TODO add-database parsing and execute
      :PROPERTIES:
      :ID:       0876da98-2434-4e2d-b415-b60d0f6ddf8d
@@ -257,7 +272,7 @@
        [[add-database_arg_parse_err][add-database_arg_parse_err]] require that predefined error format
        strings have only a single replacment defined within them. This
        may change in the future.
-******* arg_parse_err
+******* arg_parse_err                                                :IMPURE:
 	This function is for throwing errors and terminating when an
 	error in parsing occurs. It takes an integer value which is
 	the error code and a string variable containing the name of
@@ -286,7 +301,7 @@
 	#fed        
 	#+END_SRC
 
-******* get_errstr_from_errint
+******* READ-NOTE get_errstr_from_errint                               :PURE:
 	:LOGBOOK:
 	- Note taken on [2020-07-07 Tue 23:21] \\
 	  Preferably we would be able to have this function be agnostic towards
@@ -309,7 +324,7 @@
 	#fed
         #+END_SRC
 	
-******* add_database_terminus_execute 
+******* add_database_terminus_execute                                :IMPURE:
 	This is a stateful function which executes the prepared
 	add_database action on the terminusDB instance. It takes the
 	dictionary given to by [[id:e8a096ce-4c07-4a69-97ec-d2cbd35b965c][add-database]] action and connect and
@@ -344,7 +359,7 @@
 ******** TODO 
 	 - [ ] Fix connectivity
 
-***** READ-NOTE Action definition
+***** READ-NOTE Action definition                                      :PURE:
       :PROPERTIES:
       :ID:       1019d8af-8e34-4af9-aace-f5e5b9a914a3
       :END:
@@ -484,56 +499,17 @@
 	  add_database_action(sys.argv)
       #+END_SRC
 ***  add-node
-**** Positional Arguements
-     
-**** Optional Arguments
 ***  rm-database
-**** Positional Arguements
-     1. database-ID
-**** Optional Arguments
-
-     - Password
 ***  query
-**** Positional Arguements
-     1. WOQL Query
-**** Optional Arguments
-     - Commit message
-     - File list
 ***  vcs	      
 ****  Checkout
-***** Positional Arguements
-      1. branchid
-***** Optional Arguements
 ****  branch
-***** Positional Arguments
-      1. branchid
-***** Optional Arguments
 ****  pull
-***** Positional Arguments
-      1. remote-repo
-***** Optional Arguments
 ****  fetch
-***** Positional Arguments
-      1. remote-repo 
-***** Optional Arguments
 ****  push
-***** Positional Arguments
-      1. remote-repo
-***** Optional Arguments
 ****  rebase
-***** Positional Arguments
-      1. rebase-source
-***** Optional Arguments
 ****  clone
-***** Positional Arguments
-      1. remote-source
-      2. newid
-***** Optional Arguments
 ****  repo
-***** Positional Arguments
-***** Optional Arguments
-      - repoid
-
 * Files
 ** Terminus-cli.py
    :PROPERTIES:
