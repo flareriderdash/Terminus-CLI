@@ -221,7 +221,7 @@
    This interface is the interface that is used to translate the
    command line arguements into something usable. It will be seperated
    into multiple modes determined by actions. Much like the program
-   Heimdall or git. This Specifc usable thing will be template dictionaries
+   Heimdall or git.
    
 *** Interface imports ​& initialization
     :LOGBOOK:
