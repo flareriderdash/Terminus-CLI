@@ -140,14 +140,18 @@
    positional arguemnts that are required to prefix any mode
    arguments: the database url and action.
 
-*** VERIFY add-database
+*** add-database
     This action adds a database to TerminusDB instance found at url.
-**** Positional Arguements
-     1. Database id
+**** Required Arguements
+     - Database ID
+     - Username/AccountID
+     - Password
+     - Database Label
+	
 **** Optional Arguments
      - A description
-     - Any Prefixes
-     - A key
+     - Prefixes
+     - Lack of Schema
 
 *** RESEARCHING add-node
     :LOGBOOK:
