@@ -394,7 +394,6 @@
 	       print(string)
        #+END_SRC
        
-
 ***** Action definition                                                :PURE:
       :PROPERTIES:
       :ID:       1019d8af-8e34-4af9-aace-f5e5b9a914a3
@@ -423,10 +422,6 @@
 	     return 0
      #fed
      #+END_SRC
-
-****** TODO 
-       - [ ] Figure out how authentication works with these oddly
-         named/redundant variables
 
 ***** Main hook
       :PROPERTIES:
