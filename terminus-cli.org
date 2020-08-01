@@ -103,14 +103,6 @@
    Data mutation and definition is done completely via WOQL queries.
 ** Library Models
    The database client is an object which has many methods.
-
-* Constants
-  Constants defined here will be used for: error codes
-  #+NAME:constants
-  #+BEGIN_SRC python
-  ARG_LIMIT=-1
-  REQUIRED_ARG=-2
-  #+END_SRC
 * Command-Line Parser
   This is where nearly all program flow is determined. There must be a
   translation interface in place to convert comanndline arguments into
@@ -121,20 +113,6 @@
 ** TODO
    - Generalize argument parsing for the sake of ease of use in the
      future.
-** General Usage Message
-   This is the general usage message to print when no specific mode
-   was provided, telling the user about possible modes/actions that
-   they can perform.
-   #+NAME:general_usage
-   #+BEGIN_SRC python 
-   def print_gen_usage():
-	   usage = \
-   """
-   PLACEHOLDER
-   """
-	   print(usage)
-	   #fed
-   #+END_SRC
 ** Actions/Modes
    :PROPERTIES:
    :ID:       79700b07-71e5-4a72-8fb7-297604fbe3cc
@@ -225,6 +203,9 @@
    
 *** Interface imports ​& initialization
     :LOGBOOK:
+    - Note taken on [2020-07-30 Thu 18:48] \\
+      shhhhhhhhhhh, you don't see the contradictory statements
+      ooooooooooooooooooooooo
     - Note taken on [2020-07-07 Tue 23:21] \\
       Have to remember to update this if there is ever a change to how
       parsing is done within every chain
@@ -234,11 +215,13 @@
       function for each mode).
     - The copy library from python and it's shallow copy functionality
       to conform to functional programming.
+    - Argparse to handle parsing
 
     #+NAME:Parser_imports
     #+BEGIN_SRC python :noweb
     import sys
     import copy
+    import argparse
     #+END_SRC
 
 ***  add-database
@@ -246,7 +229,34 @@
     :ID:       e8a096ce-4c07-4a69-97ec-d2cbd35b965c
     :END:
     This action adds a database to TerminusDB instance found at url.
-**** TODO add-database parsing and execute
+
+**** Description of Operation
+     :LOGBOOK:
+     - Note taken on [2020-08-01 Sat 11:23] \\
+       We could actually just have the main hook contain our parser code,
+       even though it would be tangled into the main function within literate
+       programming it would still reside in the appropriate 'add-database'
+       section.
+     - Note taken on [2020-08-01 Sat 00:58] \\
+       Having the argument parser used in the main func would be useless as
+       you would have to make your own copy of it when you could just
+       instanciate a new one and avoid odd inter-function dependancies
+     :END:
+     This action/mode starts off by being called by the main function
+     when the user launches the program specifying the [[id:e8a096ce-4c07-4a69-97ec-d2cbd35b965c][add-database]]
+     action on the command-line (ref, [[id:92629282-f4d0-490d-8b03-5b00da4b97d6][Main hook]]). 
+
+     Once called, this action calls a helper function which parses and
+     aggregates the command line argument options, returning a hashmap
+     with the appropriate kwargs to accomplish the add-database
+     action.
+
+     With this hashmap the add-database action passes it into a
+     separate helper function which calls into the TerminusDB python
+     client, interacting with the TerminusDB instance and creating the
+     desired database.
+
+**** Implimentation
      :PROPERTIES:
      :ID:       0876da98-2434-4e2d-b415-b60d0f6ddf8d
      :END:
@@ -262,74 +272,18 @@
 ***** Helper functions
       These functions are generalized for use with The main
       add-database action code
-****** Error Handling
+****** READ-NOTE add_database_terminus_execute                       :IMPURE:
        :LOGBOOK:
-       - Note taken on [2020-07-07 Tue 23:34] \\
-	 Be aware that you may need to impliment error string with undefined
-	 amounts of replacments
+       - Note taken on [2020-08-01 Sat 01:17] \\
+	 Might help to rephrase
+       - Note taken on [2020-08-01 Sat 01:16] \\
+	 Fix Connectivity
        :END:
-       It is important to note that [[*get_errstr_from_errint][get_errstr_from_errint]] and
-       [[add-database_arg_parse_err][add-database_arg_parse_err]] require that predefined error format
-       strings have only a single replacment defined within them. This
-       may change in the future.
-******* arg_parse_err                                                :IMPURE:
-	This function is for throwing errors and terminating when an
-	error in parsing occurs. It takes an integer value which is
-	the error code and a string variable containing the name of
-	the argument causing the error which will be placed into a
-	format string and then printed before the usage parameter. It
-	uses the helper function [[*get_errstr_from_errint][get_errstr_from_errint]] to assist in
-	getting a predefined error format string from an integer
-	value.
-
-	The final parameter is any string that the caller would like
-	to have printed to stdout before the program terminates,
-	typically this would be a usage string for the mode/action
-	where the error was encountered.
-
-	Finally at termination, the program will terminate with the
-	error code that this function was called with. This is a
-	stateful function due to IO and process operations.
-	
-	#+NAME:add-database_arg_parse_err
-	#+BEGIN_SRC python
-	def arg_parse_err(error,str_var,usage):
-		format_str = get_errstr_from_errint(error)
-		print(format_str.format(str_var))
-		print(usage)
-		exit(error)
-	#fed        
-	#+END_SRC
-
-******* READ-NOTE get_errstr_from_errint                               :PURE:
-	:LOGBOOK:
-	- Note taken on [2020-07-07 Tue 23:21] \\
-	  Preferably we would be able to have this function be agnostic towards
-	  the arguments instead of having int-to-string conversions be hard
-	  coded.
-	:END:
-	This function is a helper function to [[*arg_parse_err][arg_parse_err]] and serves
-	to map an error integer parameter to a format string. This is
-	where one would define error strings for predefined error
-	constants. This is a stateless function
-	#+NAME:add-database_get_errstr_from_errint
-	#+BEGIN_SRC python
-	def get_errstr_from_errint(errorint):
-
-	    if errorint == ARG_LIMIT:
-		return "You cannot have more than one {}"
-	    elif errorint == REQUIRED_ARG:
-		return "{} requires an argument"
-	    #fi
-	#fed
-        #+END_SRC
-	
-******* add_database_terminus_execute                                :IMPURE:
 	This is a stateful function which executes the prepared
 	add_database action on the terminusDB instance. It takes the
 	dictionary given to by [[id:e8a096ce-4c07-4a69-97ec-d2cbd35b965c][add-database]] action and connect and
 	creates the new database to the TerminusDB instance
-	#+NAME:add-database_add_database_terminus_execute
+	#+NAME:add_database_terminus_execute
 	#+BEGIN_SRC python
 	def add_database_terminus_execute(kwargs):
 
@@ -344,160 +298,144 @@
 			user    = kwargs['accountid'])
 
 		client.account(kwargs['accountid'])
-		print(kwargs)
 		client.create_database(
 			kwargs['dbid'],
 			kwargs['accountid'],
 			label          = kwargs['label'],
 			description    = kwargs['desc'],
-			prefixes       = None,
+			prefixes       = kwargs['prefix'],
 			include_schema = kwargs['schema'])
 		return 0
 
 	#fed
 	#+END_SRC
-******** TODO 
-	 - [ ] Fix connectivity
+****** READ-NOTE add_database_parse_args                               :PURE:
+       :LOGBOOK:
+       - Note taken on [2020-08-01 Sat 01:33] \\
+	 Impliment prefixes
+       - Note taken on [2020-07-30 Thu 20:42] \\
+	 Check whether spaces are allowed within descriptions, labels or
+	 database IDs
+       :END:
+       This function returns a dictionary/hashmap of the necessary
+       keyword arguments for the add_database action. This function is
+       considered pure since command line argument namespace passed to
+       the program are reasonably assumed to be unchanging.
 
-***** READ-NOTE Action definition                                      :PURE:
+       The parsing that this function does will stay here within its
+       own separate function just to keep functions small and self
+       descriptive. Even if it may seem a bit useless for this
+       specific action.
+       #+NAME:add_database_parse_args
+       #+BEGIN_SRC python
+       def add_database_parse_args(options):
+
+	       #// Oh how I love my curly braces,
+	       #// and C syntax
+	       kwargs = \
+		       {
+			       "url":options.url,
+			       'accountid':options.account,
+			       "dbid":options.dbid,
+			       "desc":None,
+			       "pass":options.password,
+			       "prefix":None,
+			       "label":options.label,
+			       "schema":options.no_schema
+		       }
+
+	       # Allow the user to spread their description over multiple
+	       # options.
+	       if options.description != None:
+		       kwargs['desc'] = " ".join(options.description);
+
+
+	       # this is placeholder until I figure out how prefixes work
+	       if options.prefix != None:
+		       kwargs['prefix'] = " ".join(options.prefix);
+
+	       return kwargs;
+       #fed
+       #+END_SRC
+****** add_database_notify_user                                      :IMPURE:
+       This function is impure as it performs IO operations. Serving
+       notifications to the user about the state of the add-database
+       action. This is really just here for stylistic purposes and is
+       just a wrapper around the print function.
+       #+NAME:add_database_notify_user
+       #+BEGIN_SRC python
+       def add_database_notify_user(string):
+	       print(string)
+       #+END_SRC
+       
+
+***** Action definition                                                :PURE:
       :PROPERTIES:
       :ID:       1019d8af-8e34-4af9-aace-f5e5b9a914a3
       :END:
       :LOGBOOK:
+      - Note taken on [2020-08-01 Sat 15:42] \\
+	Never mind that, the terminusDB python client verifies for us
       - Note taken on [2020-07-20 Mon 15:16] \\
-	May want to define a way to verify url integrity
+	May want to define a way to verify url integrity, or simply
+        program for the successive case (partly of the functional
+        way).
       :END:
       This is the function where the add-database fuctionality is
-      initiated. It simply expects the entire command line argument
-      list (sys.argv) passed to it. It calls other helper functions to
-      perform its operations, ref [[*Helper functions][Helper functions]]. This is a
+      initiated. It expects an object retruned from the parse_arg
+      function of an argparse parser. It calls other helper functions
+      to perform its operations, ref [[*Helper functions][Helper functions]]. This is a
       stateless function
      #+NAME:add-database_action
      #+BEGIN_SRC python :noweb yes
-     <<add-database_get_errstr_from_errint>>
-     <<add-database_arg_parse_err>>
-     <<add-database_add_database_terminus_execute>>
-     def add_database_action(cmdline):
-	     # Expectations:
-	     # cmdline, sys.argv list
-
-	 usage = \
-		 """
-     Action: add-database user database_id [options]
-
-     --help, -h              display this help 
-			     message
-
-     -d, --description       description to add
-			     to created database
-
-     -p, --password          password to login with
-
-     -l, --label             label for the database
-
-     -n,--no-schema          make database without
-			     schema
-     """
-
-	 # If asking for help, politly exit
-
-	 if (("--help" in cmdline or "-h" in cmdline)
-	     or len(cmdline) < 5):
-		 print(usage)
-		 exit(0)
-	     #fi
-
-	 kwargs = {
-		 "url":sys.argv[1],
-		 "action":sys.argv[2],
-		 'accountid':sys.argv[3],
-		 "dbid":sys.argv[4],
-		 "desc":None,
-		 "pass":None,
-		 "label":None,
-		 "schema":True
-	 } 
-
-
-	 # Parse Arguments
-
-	 for index in range(len(cmdline)):
-
-	     # Description Parse
-	     if (cmdline[index] in ("-d", "--description")
-		 and kwargs['desc'] == None and (index +1) < len(cmdline)):
-		     kwargs['desc'] = cmdline[index+1]
-
-	     elif (kwargs['desc'] != None) and (cmdline[index] in ("-d", "--description")):
-		     arg_parse_err(ARG_LIMIT,"description",usage)
-	     elif (index + 1) > len(cmdline):
-		     arg_parse_err(REQUIRED_ARG,"description",usage)
-	     #fi
-
-	     # Password Parse
-	     if (cmdline[index] in ("-p" ,"--password")
-		 and kwargs['pass'] == None and (index + 1) < len(cmdline)):
-		     kwargs['pass'] = cmdline[index+1]
-
-	     elif (kwargs['pass'] != None) and (cmdline[index] in ("-p", "--password")):
-		     arg_parse_err(ARG_LIMIT,"password",usage)
-	     elif (index + 1) > len(cmdline):
-		     arg_parse_err(REQUIRED_ARG,"password",usage)
-
-	     #fi
-
-	     # Label Parse
-	     if (cmdline[index] in ("-l","--label")
-		 and kwargs['label'] == None and (index + 1) < len(cmdline)):
-		     kwargs['label'] = cmdline[index+1]
-
-	     elif (kwargs['label'] != None) and (cmdline[index] in ("-l", "--label")):
-		     arg_parse_err(ARG_LIMIT,"label",usage)
-	     elif (index + 1) > len(cmdline):
-		     arg_parse_err(REQUIRED_ARG,"label",usage)
-
-	     #fi
-
-	     # Schema Parse
-	     if (cmdline[index] in ("-n","--no-schema")
-		 and kwargs['schema'] == True):
-		     schema == False
-	     elif (kwargs['schema'] != True) and (cmdline[index] in ("-n","--no-schema")):
-		     arg_parse_err(ARG_LIMIT,"schema flag",usage)
-	     elif (index + 1) > len(cmdline):
-		     arg_parse_err(REQUIRED_ARG,"schema",usage)
-
-	     #fi
-	 #rof
-
-	 # Call stateful function for execution 
-	 add_database_terminus_execute(kwargs)
-
-	 return 0
+     <<add_database_notify_user>>
+     <<add_database_terminus_execute>>
+     <<add_database_parse_args>>
+     def add_database_action(options):
+	     kwargs = add_database_parse_args(options);
+	     add_database_terminus_execute(kwargs);
+	     return 0
      #fed
      #+END_SRC
 
 ****** TODO 
        - [ ] Figure out how authentication works with these oddly
          named/redundant variables
-         
-       - [ ] Add prefix capabilities
-
-       - [ ] Check for missing arguments
-
-       - [ ] Enforce no spaces within dbid
-
-       - [ ] Fix errors related to argument parsing of description
 
 ***** Main hook
+      :PROPERTIES:
+      :ID:       92629282-f4d0-490d-8b03-5b00da4b97d6
+      :END:
       This is simply the snippet of code makes the main function
       execute the add-database action when called for at the command
-      line.
+      line. I call it a hook for the sake of easy comprehension.
+
       #+NAME:add-database_hook
-      #+BEGIN_SRC python 
-      if sys.argv[2] == "add-database":
-	  add_database_action(sys.argv)
+      #+BEGIN_SRC python
+      add_database_parser=subparsers.add_parser('add-database', help="Action to create database within specified TerminusDB instance");
+
+      add_database_parser.add_argument("url",help="The base url for the TerminusDB instance");
+      add_database_parser.add_argument("dbid",help="The ID for the new databaase");
+      add_database_parser.add_argument("-u","--account",help="The username/account to login with",
+				       required=True);
+      add_database_parser.add_argument("-d","--description",
+				       help="The description for the new database",
+				       action="append");
+      add_database_parser.add_argument("-j","--prefix",
+				       help="The prefixes for the new database",
+				       action="append");
+      add_database_parser.add_argument("-p","--password",
+				       help="Password to login with",
+				       required=True);
+      add_database_parser.add_argument("-l","--label",
+				       help="The label for the database(no spaces allowed)",
+				       required=True);
+      add_database_parser.add_argument("-n","--no-schema",
+				       help="Disable schema for the new database");
+      add_database_parser.set_defaults(func=add_database_action);
+
       #+END_SRC
+
 ***  add-node
 ***  rm-database
 ***  query
@@ -520,15 +458,15 @@
    #!/usr/env/python3
    <<main_imports>>
    <<Parser_imports>>
-   <<constants>>
    <<add-database_action>>
-   <<general_usage>>
    def main():
-       if len(sys.argv) < 3:
-	   print_gen_usage()
-	   exit(REQUIRED_ARG)
-       <<add-database_hook>>
-       return 0
+	   parser=argparse.ArgumentParser();
+	   subparsers = parser.add_subparsers();
+	   <<add-database_hook>>
+	   options = parser.parse_args();
+	   options.func(options);
+
+       return 0;
    #fed
 
    if __name__ == "__main__":
