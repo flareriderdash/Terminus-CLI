@@ -19,7 +19,7 @@
   #+BEGIN_SRC python 
   import terminusdb_client
   #+END_SRC
-* Plan
+* Memos
 ** [2020-07-02 Thu 13:33]
    The best course of action most likely is to do the argument
    handling later since I don't know how difficult that will be. I
@@ -79,6 +79,24 @@
      the sake of consistency and because of new knowledge of the
      paradigm. Instead of omitting recursion. Need to figure out how
      to do that in python however.
+** [2020-08-01 Sat 15:48]
+   - Will want to add functionality that extends upon base client
+     cababilities. Performing specific operations that help with
+     something like the "abstract filesystem," or other ways a user may
+     want to use their database.
+
+   - Will want to have the ability for the users to define their own
+     subcommands at one point via configuration file possible. This is
+     more a long term goal than anything as at the moment I have yet to
+     impliment basic functionality, let alone query capabilities.
+
+   - argparse sub parsers don't fit well with document layout and
+     functional programming standards. This is a race condition that I
+     have found myself in somewhat.
+
+   - We will try to keep each action seperated within its own section in
+     the org file.
+
 * Research
   This section is simply a section that allows for free flowing
   thought and notetaking when regarding something about inteeracting
