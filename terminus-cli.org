@@ -319,7 +319,7 @@
 		client.create_database(
 			kwargs['dbid'],
 			kwargs['accountid'],
-			label          = kwargs['label'],
+			label          = kwargs['label'], # label require otherwise will fail to add DB
 			description    = kwargs['desc'],
 			prefixes       = kwargs['prefix'],
 			include_schema = kwargs['schema'])
@@ -327,6 +327,10 @@
 
 	#fed
 	#+END_SRC
+
+	#+RESULTS: add_database_terminus_execute
+	: None
+
 ****** READ-NOTE add_database_parse_args                               :PURE:
        :LOGBOOK:
        - Note taken on [2020-08-01 Sat 01:33] \\
