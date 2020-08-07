@@ -100,6 +100,10 @@
    Now that the add-database functionality is within it's first
    implimentation, I'm going to impliment the delete database
    functionality.
+** [2020-08-06 Thu 13:48]
+   Within the planned config file, we should allow for the user to
+   provide defaults for commands so as to make command line usage even
+   easier and shorter.
 
 * Research
   This section is simply a section that allows for free flowing
@@ -128,90 +132,8 @@
 * Command-Line Parser
   This is where nearly all program flow is determined. There must be a
   translation interface in place to convert comanndline arguments into
-  usable structures within python. Code blocks concerning certain
-  sections under [[id:79700b07-71e5-4a72-8fb7-297604fbe3cc][Actions/Modes]] will be placed into the sister section
-  [[id:c7c42c51-3351-44c9-8c1d-9f4bbb11393c][Interface]], for the sake of reader convenience while also allowing
-  for some separation between ideas and actual code documentation. 
-** Actions/Modes
-   :PROPERTIES:
-   :ID:       79700b07-71e5-4a72-8fb7-297604fbe3cc
-   :END:
-   Actions/Modes allow for a more condensed command line interface and
-   they will therefore be used. However, in this program there are two
-   positional arguemnts that are required to prefix any mode
-   arguments: the database url and action.
-
-*** add-database
-    This action adds a database to TerminusDB instance found at url.
-**** Required Arguements
-     - Database ID
-     - Username/AccountID
-     - Password
-     - Database Label
-	
-**** Optional Arguments
-     - A description
-     - Prefixes
-     - Lack of Schema
-
-*** RESEARCHING add-node
-    :LOGBOOK:
-    - Note taken on [2020-07-01 Wed 23:23] \\
-      Seems to need a WOQL to import data
-    - Note taken on [2020-07-01 Wed 21:57] \\
-      Need to research how the database stores data after a database is created 
-    :END:
-**** Positional Arguements
-     
-**** Optional Arguments
-*** VERIFY rm-database
-**** Positional Arguements
-     1. database-ID
-**** Optional Arguments
-
-     - Password
-*** VERIFY query
-**** Positional Arguements
-     1. WOQL Query
-**** Optional Arguments
-     - Commit message
-     - File list
-*** vcs	      
-**** VERIFY Checkout
-***** Positional Arguements
-      1. branchid
-***** Optional Arguements
-**** VERIFY branch
-***** Positional Arguments
-      1. branchid
-***** Optional Arguments
-**** VERIFY pull
-***** Positional Arguments
-      1. remote-repo
-***** Optional Arguments
-**** VERIFY fetch
-***** Positional Arguments
-      1. remote-repo 
-***** Optional Arguments
-**** VERIFY push
-***** Positional Arguments
-      1. remote-repo
-***** Optional Arguments
-**** VERIFY rebase
-***** Positional Arguments
-      1. rebase-source
-***** Optional Arguments
-**** VERIFY clone
-***** Positional Arguments
-      1. remote-source
-      2. newid
-***** Optional Arguments
-**** VERIFY repo
-***** Positional Arguments
-***** Optional Arguments
-      - repoid
-
-** Interface
+  usable structures within python. That is done here.
+** Actions/Mode Interface
    :PROPERTIES:
    :ID:       c7c42c51-3351-44c9-8c1d-9f4bbb11393c
    :END:
