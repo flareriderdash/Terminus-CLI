@@ -17,11 +17,10 @@ def add_database_terminus_execute(kwargs):
                 key     = kwargs['pass'],
                 user    = kwargs['accountid'])
 
-        client.account(kwargs['accountid'])
         client.create_database(
                 kwargs['dbid'],
                 kwargs['accountid'],
-                label          = kwargs['label'],
+                label          = kwargs['label'], # label require otherwise will fail to add DB
                 description    = kwargs['desc'],
                 prefixes       = kwargs['prefix'],
                 include_schema = kwargs['schema'])
@@ -48,18 +47,47 @@ def add_database_parse_args(options):
         # options.
         if options.description != None:
                 kwargs['desc'] = " ".join(options.description);
-
+        #fi
 
         # this is placeholder until I figure out how prefixes work
         if options.prefix != None:
                 kwargs['prefix'] = " ".join(options.prefix);
-
+        #fi
         return kwargs;
 #fed
 def add_database_action(options):
         kwargs = add_database_parse_args(options);
         add_database_terminus_execute(kwargs);
         return 0
+#fed
+def rm_database_parse_args(options):
+        kwargs = \
+                {
+                        "url":options.url,
+                        "accountid":options.account,
+                        "dbid":options.dbid,
+                        "pass":options.password
+                }
+
+        return kwargs;
+#fed
+def rm_database_terminus_execute(kwargs):
+        # Functional Programming stuffs
+        kwargs = copy.copy(kwargs);
+
+        client=terminusdb_client.WOQLClient(server_url = kwargs['url']);
+        client.connect(
+                account = kwargs['accountid'],
+                key     = kwargs['pass'],
+                user    = kwargs['accountid']);
+
+        client.delete_database(kwargs['dbid']);
+
+#fed
+def rm_database_action(options):
+        kwargs = rm_database_parse_args(options);
+        rm_database_terminus_execute(kwargs);
+        return 0;
 #fed
 def main():
         parser=argparse.ArgumentParser();
@@ -86,6 +114,16 @@ def main():
                                          help="Disable schema for the new database");
         add_database_parser.set_defaults(func=add_database_action);
         
+        rm_database_parser=subparsers.add_parser('rm-database', help="Action to delete database within specified TerminusDB instance");
+        
+        rm_database_parser.add_argument("url",help="The base url for the TerminusDB instance");
+        rm_database_parser.add_argument("dbid",help="The ID for the soon to be deleted databaase");
+        rm_database_parser.add_argument("-u","--account",help="The username/account to login with",
+                                        required=True);
+        rm_database_parser.add_argument("-p","--password",
+                                        help="Password to login with",
+                                        required=True);
+        rm_database_parser.set_defaults(func=rm_database_action);
         options = parser.parse_args();
         options.func(options);
 

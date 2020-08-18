@@ -16,7 +16,7 @@
   by the terminusDB developers.
 
   #+NAME:main_imports
-  #+BEGIN_SRC python 
+  #+BEGIN_SRC python  :exports code
   import terminusdb_client
   #+END_SRC
 * Memos
@@ -96,6 +96,14 @@
 
    - We will try to keep each action seperated within its own section in
      the org file.
+** [2020-08-06 Thu 12:12]
+   Now that the add-database functionality is within it's first
+   implimentation, I'm going to impliment the delete database
+   functionality.
+** [2020-08-06 Thu 13:48]
+   Within the planned config file, we should allow for the user to
+   provide defaults for commands so as to make command line usage even
+   easier and shorter.
 
 * Research
   This section is simply a section that allows for free flowing
@@ -133,97 +141,15 @@
 * Command-Line Parser
   This is where nearly all program flow is determined. There must be a
   translation interface in place to convert comanndline arguments into
-  usable structures within python. Code blocks concerning certain
-  sections under [[id:79700b07-71e5-4a72-8fb7-297604fbe3cc][Actions/Modes]] will be placed into the sister section
-  [[id:c7c42c51-3351-44c9-8c1d-9f4bbb11393c][Interface]], for the sake of reader convenience while also allowing
-  for some separation between ideas and actual code documentation. 
-** TODO
-   - Generalize argument parsing for the sake of ease of use in the
-     future.
-** Actions/Modes
-   :PROPERTIES:
-   :ID:       79700b07-71e5-4a72-8fb7-297604fbe3cc
-   :END:
-   Actions/Modes allow for a more condensed command line interface and
-   they will therefore be used. However, in this program there are two
-   positional arguemnts that are required to prefix any mode
-   arguments: the database url and action.
-
-*** add-database
-    This action adds a database to TerminusDB instance found at url.
-**** Required Arguements
-     - Database ID
-     - Username/AccountID
-     - Password
-     - Database Label
-	
-**** Optional Arguments
-     - A description
-     - Prefixes
-     - Lack of Schema
-
-*** RESEARCHING add-node
-    :LOGBOOK:
-    - Note taken on [2020-07-01 Wed 23:23] \\
-      Seems to need a WOQL to import data
-    - Note taken on [2020-07-01 Wed 21:57] \\
-      Need to research how the database stores data after a database is created 
-    :END:
-**** Positional Arguements
-     
-**** Optional Arguments
-*** VERIFY rm-database
-**** Positional Arguements
-     1. database-ID
-**** Optional Arguments
-
-     - Password
-*** VERIFY query
-**** Positional Arguements
-     1. WOQL Query
-**** Optional Arguments
-     - Commit message
-     - File list
-*** vcs	      
-**** VERIFY Checkout
-***** Positional Arguements
-      1. branchid
-***** Optional Arguements
-**** VERIFY branch
-***** Positional Arguments
-      1. branchid
-***** Optional Arguments
-**** VERIFY pull
-***** Positional Arguments
-      1. remote-repo
-***** Optional Arguments
-**** VERIFY fetch
-***** Positional Arguments
-      1. remote-repo 
-***** Optional Arguments
-**** VERIFY push
-***** Positional Arguments
-      1. remote-repo
-***** Optional Arguments
-**** VERIFY rebase
-***** Positional Arguments
-      1. rebase-source
-***** Optional Arguments
-**** VERIFY clone
-***** Positional Arguments
-      1. remote-source
-      2. newid
-***** Optional Arguments
-**** VERIFY repo
-***** Positional Arguments
-***** Optional Arguments
-      - repoid
-
-** Interface
+  usable structures within python. That is done here.
+** Actions/Mode Interface
    :PROPERTIES:
    :ID:       c7c42c51-3351-44c9-8c1d-9f4bbb11393c
    :END:
    :LOGBOOK:
+   - Note taken on [2020-08-06 Thu 12:49] \\
+     The actions all seem to follow the same template in code layout, may
+     in the future want to note that.
    - Note taken on [2020-07-07 Tue 23:58] \\
      May want to use POSIX syntax for arguments
    :END:
@@ -249,7 +175,7 @@
     - Argparse to handle parsing
 
     #+NAME:Parser_imports
-    #+BEGIN_SRC python :noweb
+    #+BEGIN_SRC python :noweb :exports code
     import sys
     import copy
     import argparse
@@ -315,7 +241,7 @@
 	dictionary given to by [[id:e8a096ce-4c07-4a69-97ec-d2cbd35b965c][add-database]] action and connect and
 	creates the new database to the TerminusDB instance
 	#+NAME:add_database_terminus_execute
-	#+BEGIN_SRC python
+	#+BEGIN_SRC python :exports code
 	def add_database_terminus_execute(kwargs):
 
 		# Functional Programming stuffs
@@ -328,7 +254,6 @@
 			key     = kwargs['pass'],
 			user    = kwargs['accountid'])
 
-		client.account(kwargs['accountid'])
 		client.create_database(
 			kwargs['dbid'],
 			kwargs['accountid'],
@@ -362,7 +287,7 @@
        descriptive. Even if it may seem a bit useless for this
        specific action.
        #+NAME:add_database_parse_args
-       #+BEGIN_SRC python
+       #+BEGIN_SRC python  :exports code
        def add_database_parse_args(options):
 
 	       #// Oh how I love my curly braces,
@@ -383,12 +308,12 @@
 	       # options.
 	       if options.description != None:
 		       kwargs['desc'] = " ".join(options.description);
-
-
+	       #fi
+	
 	       # this is placeholder until I figure out how prefixes work
 	       if options.prefix != None:
 		       kwargs['prefix'] = " ".join(options.prefix);
-
+	       #fi
 	       return kwargs;
        #fed
        #+END_SRC
@@ -398,16 +323,18 @@
        action. This is really just here for stylistic purposes and is
        just a wrapper around the print function.
        #+NAME:add_database_notify_user
-       #+BEGIN_SRC python
+       #+BEGIN_SRC python :exports code
        def add_database_notify_user(string):
 	       print(string)
        #+END_SRC
        
-***** Action definition                                                :PURE:
+***** READ-NOTE Action definition                                      :PURE:
       :PROPERTIES:
       :ID:       1019d8af-8e34-4af9-aace-f5e5b9a914a3
       :END:
       :LOGBOOK:
+      - Note taken on [2020-08-06 Thu 12:41] \\
+	Should impliment error messages for the user
       - Note taken on [2020-08-01 Sat 15:42] \\
 	Never mind that, the terminusDB python client verifies for us
       - Note taken on [2020-07-20 Mon 15:16] \\
@@ -421,7 +348,7 @@
       to perform its operations, ref [[*Helper functions][Helper functions]]. This is a
       stateless function
      #+NAME:add-database_action
-     #+BEGIN_SRC python :noweb yes
+     #+BEGIN_SRC python :noweb yes  :exports code
      <<add_database_notify_user>>
      <<add_database_terminus_execute>>
      <<add_database_parse_args>>
@@ -437,11 +364,12 @@
       :ID:       92629282-f4d0-490d-8b03-5b00da4b97d6
       :END:
       This is simply the snippet of code makes the main function
-      execute the add-database action when called for at the command
-      line. I call it a hook for the sake of easy comprehension.
+      execute the rm-database action when called for at the command
+      line, also defining the required arguments for the action. I
+      call it a hook for the sake of easy comprehension.
 
       #+NAME:add-database_hook
-      #+BEGIN_SRC python
+      #+BEGIN_SRC python  :exports code
       add_database_parser=subparsers.add_parser('add-database', help="Action to create database within specified TerminusDB instance");
 
       add_database_parser.add_argument("url",help="The base url for the TerminusDB instance");
@@ -465,13 +393,115 @@
       add_database_parser.set_defaults(func=add_database_action);
 
       #+END_SRC
-***  rm-database
+
 ***  list-databases
 **** Description of Operation
      This Action will take from the command line interface only the
      url of the TerminusDB instance as it will simply pretty print the
      databases. 
 ***  add-node
+*** TODO rm-database
+    SCHEDULED: <2020-08-06 Thu 12:00>
+    :PROPERTIES:
+    :ID:       54bde0b9-16bc-45b9-a913-50f2d5669cfe
+    :END:
+    The action to remove a database at the specified TerminusDB
+    instance.
+**** Description of Operation
+     This action/mode starts off by being called by the main function
+     when the user launches the program specifying the [[id:54bde0b9-16bc-45b9-a913-50f2d5669cfe][rm-database]]
+     action on the command-line (ref, [[id:92629282-f4d0-490d-8b03-5b00da4b97d6][Main hook]]).
+
+     Once called, this action calls a helper function which parses and
+     aggregates the command line argument options, returning a hashmap
+     with the appropriate kwargs to accomplish the add-database
+     action.
+
+     With this hashmap the add-database action passes it into a
+     separate helper function which calls into the TerminusDB python
+     client, interacting with the TerminusDB instance and removing the
+     desired database.
+
+**** Implimentation
+***** Helper Functions
+****** rm_database_terminus_execute                                  :IMPURE:
+       The function that sends actions to the TerminusDB instance to
+       remove the desired database via the terminusdb client
+       library. This function is impure as it modifies the state of
+       the server, with changes persisting after the function returns.
+       #+NAME:rm-database_terminus_execute
+       #+BEGIN_SRC python :exports code
+       def rm_database_terminus_execute(kwargs):
+	       # Functional Programming stuffs
+	       kwargs = copy.copy(kwargs);
+
+	       client=terminusdb_client.WOQLClient(server_url = kwargs['url']);
+	       client.connect(
+		       account = kwargs['accountid'],
+		       key     = kwargs['pass'],
+		       user    = kwargs['accountid']);
+
+	       client.delete_database(kwargs['dbid']);
+
+       #fed
+       #+END_SRC
+****** rm_database_parse_args                                          :PURE:
+       This function takes the argument list given by the action's
+       main function and aggregates the results into a key value
+       dictionary
+
+       The parsing that this function does will stay within its own
+       separate function just to keep functions small and self
+       descriptive. Even if it may seem a bit useless for this
+       specific action.
+       
+       #+NAME:rm-database_parse-args
+       #+BEGIN_SRC python :exports code
+       def rm_database_parse_args(options):
+	       kwargs = \
+		       {
+			       "url":options.url,
+			       "accountid":options.account,
+			       "dbid":options.dbid,
+			       "pass":options.password
+		       }
+
+	       return kwargs;
+       #fed
+       #+END_SRC
+***** Action Definition                                                :PURE:
+      This function is the main function for the rm-database action,
+      stitching the outputs of functions together.
+      #+NAME:rm-database_action
+      #+BEGIN_SRC python :exports code :noweb yes
+      <<rm-database_parse-args>>
+      <<rm-database_terminus_execute>>
+      def rm_database_action(options):
+	      kwargs = rm_database_parse_args(options);
+	      rm_database_terminus_execute(kwargs);
+	      return 0;
+      #fed
+      #+END_SRC
+***** Main hook
+      This is simply the snippet of code makes the main function
+      execute the rm-database action when called for at the command
+      line, also defining the required arguments for the action. I
+      call it a hook for the sake of easy comprehension.
+
+      #+NAME:rm-database_hook
+      #+BEGIN_SRC python :exports code
+      rm_database_parser=subparsers.add_parser('rm-database', help="Action to delete database within specified TerminusDB instance");
+
+      rm_database_parser.add_argument("url",help="The base url for the TerminusDB instance");
+      rm_database_parser.add_argument("dbid",help="The ID for the soon to be deleted databaase");
+      rm_database_parser.add_argument("-u","--account",help="The username/account to login with",
+				      required=True);
+      rm_database_parser.add_argument("-p","--password",
+				      help="Password to login with",
+				      required=True);
+      rm_database_parser.set_defaults(func=rm_database_action);
+      #+END_SRC
+
 ***  query
 ***  vcs	      
 ****  Checkout
@@ -488,15 +518,17 @@
    :ID:       37643e89-278b-480c-8205-2bb52ee03f17
    :END:
    #+NAME:Main-file
-   #+BEGIN_SRC python :tangle terminus-cli.py :noweb yes
+   #+BEGIN_SRC python :tangle terminus-cli.py :noweb yes :exports code
    #!/usr/env/python3
    <<main_imports>>
    <<Parser_imports>>
    <<add-database_action>>
+   <<rm-database_action>>
    def main():
 	   parser=argparse.ArgumentParser();
 	   subparsers = parser.add_subparsers();
 	   <<add-database_hook>>
+	   <<rm-database_hook>>
 	   options = parser.parse_args();
 	   options.func(options);
 
