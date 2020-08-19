@@ -386,6 +386,16 @@
       #+END_SRC
 
 ***  add-node
+*** list-database
+    :LOGBOOK:
+    CLOCK: [2020-08-18 Tue 18:59]--[2020-08-18 Tue 19:01] =>  0:02
+    CLOCK: [2020-08-18 Tue 18:41]--[2020-08-18 Tue 18:47] =>  0:06
+    CLOCK: [2020-08-18 Tue 18:36]--[2020-08-18 Tue 18:37] =>  0:01
+    :END:
+**** Description of Operation
+     This simply retrieves a list from the terminusn
+**** Implimentation
+
 *** TODO rm-database
     SCHEDULED: <2020-08-06 Thu 12:00>
     :PROPERTIES:
