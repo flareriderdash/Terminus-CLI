@@ -104,7 +104,50 @@
    Within the planned config file, we should allow for the user to
    provide defaults for commands so as to make command line usage even
    easier and shorter.
+** [2020-08-18 Tue 20:11]
+   After Looking at the source code of
+   https://github.com/terminusdb/terminusdb-client-python/blob/master/terminusdb_client/woqlquery/woql_library.py
+   it helps me to realize that WOQLLib just returns a query object
+   that you can pass to the WOQLClient.
+** [2020-08-26 Wed 23:06]
+   After putting to test the initial implimentation of the
+   list-database functionality I am thrown an error reporting that
+   describes the WOQLLib object as being incomplete as there are
+   references to attributes of the class's self that don't currently
+   exist as of now.
 
+   #+BEGIN_EXAMPLE
+   /home/flare/Documents/Personal Work/terminusdb-cli-client/terminusdb-client-python/terminusdb_
+   client/woqldataframe/woqlDataframe.py:14: UserWarning: woqlDataframe requirements are not inst
+   alled.                                                                                       
+
+   If you want to use woqlDataframe, please pip install as follows:
+
+     python -m pip install -U terminus-client-python[dataframe]
+     warnings.warn(msg)
+   Traceback (most recent call last):
+     File "terminus-cli.py", line 162, in <module>
+       main()
+     File "terminus-cli.py", line 156, in main
+       options.func(options);
+     File "terminus-cli.py", line 70, in list_database_action
+       query_macro = WOQLLib_obj.dbs(None,None);
+     File "/home/flare/Documents/Personal Work/terminusdb-cli-client/terminusdb-client-python/ter
+   minusdb_client/woqlquery/woql_library.py", line 656, in dbs                                  
+       return WOQLQuery().using(self.masterdb_resource, compiled)
+   AttributeError: 'WOQLLib' object has no attribute 'masterdb_resource'
+
+   Process /usr/bin/python3 exited abnormally with code 1
+   #+END_EXAMPLE
+
+   I am fully aware that this could possible be an issue with the
+   woqlDataframe libraries, but as of now I cannot resolve the issue
+   without possibly resorting to drastic reinstallations of python and
+   applications that use it.
+
+   Considering all this however, I still am lead to believe that this is
+   simply the case that this python client for the TerminusDB is work in
+   progress; as I have already begun to feel.
 * Research
   This section is simply a section that allows for free flowing
   thought and notetaking when regarding something about inteeracting
@@ -137,7 +180,8 @@
    returned from it. This WOQLLib object seems to mainly be a data
    struture with simple getters and setters. Possibly an intermediary
    structure sent between the python code and the terminusdb_client
-   api calls.o
+   api calls.
+
 * Command-Line Parser
   This is where nearly all program flow is determined. There must be a
   translation interface in place to convert comanndline arguments into
@@ -394,22 +438,81 @@
 
       #+END_SRC
 
-***  list-databases
+*** READ-NOTE list-databases
+    :LOGBOOK:
+    - Note taken on [2020-08-18 Tue 20:22] \\
+      WOQLLib actually allows for arbitrary definition of prefixes when
+      creating queries, this I assume is due to the macro-like nature of the
+      object, having to make allowances for terminusdb instances with
+      non-standard prefix paths. *We may wish to allow for this
+      functionality in the future*.
+    CLOCK: [2020-08-18 Tue 20:19]--[2020-08-18 Tue 20:32] =>  0:13
+    CLOCK: [2020-08-18 Tue 20:13]--[2020-08-18 Tue 20:19] =>  0:06
+    CLOCK: [2020-08-18 Tue 19:03]--[2020-08-18 Tue 19:17] =>  0:14
+    :END:
 **** Description of Operation
      This Action will take from the command line interface only the
      url of the TerminusDB instance as it will simply pretty print the
-     databases. 
-***  add-node
-*** list-database
-    :LOGBOOK:
-    CLOCK: [2020-08-18 Tue 18:59]--[2020-08-18 Tue 19:01] =>  0:02
-    CLOCK: [2020-08-18 Tue 18:41]--[2020-08-18 Tue 18:47] =>  0:06
-    CLOCK: [2020-08-18 Tue 18:36]--[2020-08-18 Tue 18:37] =>  0:01
-    :END:
-**** Description of Operation
-     This simply retrieves a list from the terminusn
-**** Implimentation
+     databases.
 
+     Specifically this is done via using the WOQLLib convienence
+     object which returns a WOQLQuery that we can then pass to the
+     server via the WOQLClient object and pretty printing the result.
+**** Implimentation
+     This implimentation will later take favor of WOQLLib described
+     within the terminusdb python client [[https://terminusdb.github.io/terminusdb-client-python/woqlLib.html][documentation]]. This is just a
+     wornking solution and nice little test of my interpretating of
+     other peoples' code.
+***** TODO Action Definition                                           :PURE:
+      Instantiates a WOQLLib object and then executes the query
+      returned to recieve the list of databases. Do note I call it a
+      query macro simply because that is somewhat how the WOQLLib
+      object behaves as. This is pure as it never changes the state of
+      any object outside the function's scope.
+      #+NAME:list_database_action
+      #+BEGIN_SRC python :exports code
+      def list_database_action(options):
+
+	      # Instantiate Objects
+	      client = terminusdb_client.WOQLClient(options.url);
+	      WOQLLib_obj = terminusdb_client.WOQLLib();
+
+	      # Generate query for database
+	      query_macro = WOQLLib_obj.dbs(None,None);
+
+
+	      # Execute Query
+	      client.connect(
+		      account = options.account,
+		      key     = options.password
+	      );
+
+	      db_list = client.query(query_macro);
+	      print(db_list)
+      #fed	
+      #+END_SRC
+***** Main hook
+      This is simply the snippet of code makes the main function
+      execute the rm-database action when called for at the command
+      line, also defining the required arguments for the action. I
+      call it a hook for the sake of easy comprehension.
+
+      #+NAME:list-database_hook
+      #+BEGIN_SRC python  :exports code
+      list_database_parser=subparsers.add_parser('list-database', help="Action to list databases within specified TerminusDB instance");
+
+      list_database_parser.add_argument("url",help="The base url for the TerminusDB instance");
+      list_database_parser.add_argument("-p","--password",
+					help="Password to login with",
+					required=True)
+      list_database_parser.add_argument("-u","--account",help="The username/account to login with",
+					     required=True);
+      list_database_parser.set_defaults(func=list_database_action);
+      #+END_SRC
+
+
+
+***  add-node
 *** TODO rm-database
     SCHEDULED: <2020-08-06 Thu 12:00>
     :PROPERTIES:
@@ -533,12 +636,14 @@
    <<main_imports>>
    <<Parser_imports>>
    <<add-database_action>>
+   <<list_database_action>>
    <<rm-database_action>>
    def main():
 	   parser=argparse.ArgumentParser();
 	   subparsers = parser.add_subparsers();
 	   <<add-database_hook>>
 	   <<rm-database_hook>>
+	   <<list-database_hook>>
 	   options = parser.parse_args();
 	   options.func(options);
 

@@ -60,6 +60,25 @@ def add_database_action(options):
         add_database_terminus_execute(kwargs);
         return 0
 #fed
+def list_database_action(options):
+
+        # Instantiate Objects
+        client = terminusdb_client.WOQLClient(options.url);
+        WOQLLib_obj = terminusdb_client.WOQLLib();
+
+        # Generate query for database
+        query_macro = WOQLLib_obj.dbs(None,None);
+
+
+        # Execute Query
+        client.connect(
+                account = options.account,
+                key     = options.password
+        );
+
+        db_list = client.query(query_macro);
+        print(db_list)
+#fed    
 def rm_database_parse_args(options):
         kwargs = \
                 {
@@ -124,6 +143,15 @@ def main():
                                         help="Password to login with",
                                         required=True);
         rm_database_parser.set_defaults(func=rm_database_action);
+        list_database_parser=subparsers.add_parser('list-database', help="Action to list databases within specified TerminusDB instance");
+        
+        list_database_parser.add_argument("url",help="The base url for the TerminusDB instance");
+        list_database_parser.add_argument("-p","--password",
+                                          help="Password to login with",
+                                          required=True)
+        list_database_parser.add_argument("-u","--account",help="The username/account to login with",
+                                               required=True);
+        list_database_parser.set_defaults(func=list_database_action);
         options = parser.parse_args();
         options.func(options);
 
