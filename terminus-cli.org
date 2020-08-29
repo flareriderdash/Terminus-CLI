@@ -148,40 +148,16 @@
    Considering all this however, I still am lead to believe that this is
    simply the case that this python client for the TerminusDB is work in
    progress; as I have already begun to feel.
-* Research
-  This section is simply a section that allows for free flowing
-  thought and notetaking when regarding something about inteeracting
-  with TerminusDB. None of this should be taken as fact, as this is
-  where thoughts mature and are nutrued into full fledge ideas and
-  knowledge.
-
-** General
-   An example of how to use the TerminusDB use is found [[https://terminusdb.com/docs/getting-started/start-tutorials/console_js/#create-a-schema][here]]
-** Schemas
-   - TerminusDB allows for schemaless databases but heavily encourages
-     use of schemas.
-     - OWL is used for defining schemas
-     - There are javascript and python libraries for schema
-       development
-   - Schemas define the "Classes" of data which follow closely to how
-     classes are described in OOP.
-     - Properties are a little confusing.
-   - Detailed info on schemas can be found [[https://terminusdb.com/docs/user-guide/schema][here]] and in section
-     "Classes ​& Properties" [[https://terminusdb.com/docs/getting-started/intro-graph/][here]]
-** Data Mutation
-   Data mutation and definition is done completely via WOQL queries.
-** Library Models
-   The database client is an object which has many methods.
-** Listing Databases
-   From [[https://terminusdb.github.io/terminusdb-client-python/woqlLib.html][this]] it seems like to edit many of the aspects of a database
-   within a TerminusDB instance you must instanciate A WOQLLib object
-   which. However I would assume that you must somehow have this
-   WOQLLib instance be assocaited to some client connection or
-   returned from it. This WOQLLib object seems to mainly be a data
-   struture with simple getters and setters. Possibly an intermediary
-   structure sent between the python code and the terminusdb_client
-   api calls.
-
+** [2020-08-28 Fri 23:39]
+   Now that I have a few very basic features I need to learn a little
+   more about the internals of this graph database. Since as of now it
+   isn't very well documented outside standing source-code I will have
+   to take a step to the next best thing. To begin to understand the
+   core functionality through looking at the prived mature javascript
+   client. Possibly I will find some features that I need to impliment
+   to make this a full-fledged CLI client for the TerminusDB. I plan
+   to hold off on implimenting a method of general query until further
+   notice.
 * Command-Line Parser
   This is where nearly all program flow is determined. There must be a
   translation interface in place to convert comanndline arguments into
@@ -438,7 +414,7 @@
 
       #+END_SRC
 
-*** READ-NOTE list-databases
+*** WAITING list-databases
     :LOGBOOK:
     - Note taken on [2020-08-18 Tue 20:22] \\
       WOQLLib actually allows for arbitrary definition of prefixes when
@@ -509,7 +485,6 @@
 					     required=True);
       list_database_parser.set_defaults(func=list_database_action);
       #+END_SRC
-
 
 
 ***  add-node
