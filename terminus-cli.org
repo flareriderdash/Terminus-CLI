@@ -7,6 +7,26 @@
   testing being done on the Terminus docker image. This project also
   will attempt to impliment functional programming programming styles
 
+* Quick Note
+  Before someone messages me about how this program has quite a lot of
+  repeated code, I want to remind that this is meant to be a wrapper
+  for the terminusdb-python-client for CLI interaction. Many things I
+  do will have to be repeated due to the nature of the project.
+
+  I too hate copy paste code, but to adhere to functional programming
+  standards and to not have a colossal function table structure I must
+  do it this way. Especially since the nature of the code cannot be
+  generalized to a meaninginful point without breaking functional
+  standards and overall degrading the readbility and modularity of the
+  program.
+
+  As for the Documentation (this org file) I wish to have a template
+  for most CLI entries to follow just to allow the reader to have a
+  quicker time understanding this programs various functions.
+
+  Now, I am welcome to have any suggestions regarding the
+  generalization of code; as long as they are conforming to a
+  functional style. [[mailto:gabrielxaviersmith@gmail.com]]
 * TODO Glossary
   View the official terminusdb website for terms and definitions
 * Backend
